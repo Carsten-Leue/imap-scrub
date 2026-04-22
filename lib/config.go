@@ -28,6 +28,7 @@ type YamlConfig struct {
 	Port     *int   `yaml:"port"`
 	User     string `yaml:"user"`
 	Pass     string `yaml:"pass"`
+	PassFile string `yaml:"pass_file"` // Path to file containing the password
 	SavePath string `yaml:"save_path"`
 	UseTrash bool   `yaml:"use_trash"`
 	Rules    []Rule `yaml:"rules"`
@@ -64,8 +65,18 @@ func ReadConfig(file string) {
 		os.Exit(2)
 	}
 
+	// Load password from file if PassFile is specified
+	if Config.PassFile != "" {
+		passData, err := os.ReadFile(Config.PassFile)
+		if err != nil {
+			Log.ErrorF("Error reading password file %s: %s", Config.PassFile, err)
+			os.Exit(2)
+		}
+		Config.Pass = strings.TrimSpace(string(passData))
+	}
+
 	if Config.User == "" || Config.Pass == "" || Config.Host == "" {
-		Log.Error("Please ensure host, user & password are set")
+		Log.Error("Please ensure host, user & password (or pass_file) are set")
 		os.Exit(2)
 	}
 
