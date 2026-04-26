@@ -41,13 +41,14 @@ rules:
     older_than: 365              # days
     actions: remove_attachments
   - mailbox: "[Gmail]/All Mail"
-    from: invitations@linkedin.com
+    from: invitations@linkedin.com, updates@linkedin.com
     older_than: 30
     actions: delete
   - mailbox: "[Gmail]/All Mail"
     from: myclient@example.com
-    min_size: 512 
+    min_size: 512
     older_than: 90
+    newer_than: 30
     actions: save_attachments, remove_attachments
 ```
 
@@ -76,7 +77,8 @@ rules:
   - mailbox:         string # IMAP mailbox name see below)
     min_size:        0      # minimum message size in kB
     older_than:      0      # older than x days
-    from:            string # match "From" field
+    newer_than:      0      # newer than x days
+    from:            string # match "From" field, comma-separated for OR matching
     to:              string # match "To" field
     subject:         string # match email subject
     body:            string # match email body
@@ -115,10 +117,30 @@ The mailbox you wish to search. On standard IMAP servers this is probably `INBOX
 On Gmail this is possibly `[Gmail]/All Mail` or `[Google Mail]/All Mail`, but may differ based on your selected language. To list the mailboxes on your IMAP server to make a choice, run `imap-scrub -m <your-config.yml>` which will print out all mailboxes in your account.
 
 
+### Option: `from`
+
+The `from` option matches the email `From` header.
+
+You can provide either a single sender or a comma-separated list. When multiple senders are provided, a message matches if it matches any one of them.
+
+Example:
+
+```yaml
+from: billing@example.com, invoices@example.com, receipts@example.com
+```
+
 ### Option: `use_trash`
 
 If `use_trash` is set to `true`, and your IMAP returns a trash mailbox, then deleted messages will be moved into this mailbox. **Note** that Gmail does not support IMAP delete, so `use_trash` will always be set to `true` for Gmail.
 
+
+### Option: `older_than` / `newer_than`
+
+`older_than` and `newer_than` are optional day-based filters for the email date.
+
+- `older_than: 30` matches messages older than 30 days
+- `newer_than: 7` matches messages from the last 7 days
+- using both together matches a date range, for example `older_than: 90` with `newer_than: 30` matches messages between 30 and 90 days old
 
 ### Option: `actions`
 
